@@ -305,7 +305,7 @@ class MQTT_base:
         await asyncio.sleep_ms(0)
         self.dprint("Connecting to broker.")
         if self.ssl:
-            self.sock = self.ssl.wrap_socket(self.sock, server_hostname=self.server)
+            self._sock = self.ssl.wrap_socket(self._sock, server_hostname=self.server)
         premsg = bytearray(b"\x10\0\0\0\0\0")
         msg = bytearray(b"\x04MQTT\x00\0\0\0")
         msg[5] = 0x05 if mqttv5 else 0x04
