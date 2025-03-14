@@ -95,8 +95,7 @@ config = {
     "password": "",
     "keepalive": 60,
     "ping_interval": 0,
-    "ssl": False,
-    "ssl_params": {},
+    "ssl": None,
     "response_time": 10,
     "clean_init": True,
     "clean": True,
@@ -169,8 +168,7 @@ class MQTT_base:
         # WiFi config
         self._ssid = config["ssid"]  # Required for ESP32 / Pyboard D. Optional ESP8266
         self._wifi_pw = config["wifi_pw"]
-        self._ssl = config["ssl"]
-        self._ssl_params = config["ssl_params"]
+        self.ssl = config["ssl"]
         # Callbacks and coros
         if self._events:
             self.up = asyncio.Event()
@@ -184,7 +182,7 @@ class MQTT_base:
         # Network
         self.port = config["port"]
         if self.port == 0:
-            self.port = 8883 if self._ssl else 1883
+            self.port = 8883 if self.ssl else 1883
         self.server = config["server"]
         if self.server is None:
             raise ValueError("no server specified.")
@@ -306,13 +304,8 @@ class MQTT_base:
                 raise
         await asyncio.sleep_ms(0)
         self.dprint("Connecting to broker.")
-        if self._ssl:
-            try:
-                import ssl
-            except ImportError:
-                import ussl as ssl
-
-            self._sock = ssl.wrap_socket(self._sock, **self._ssl_params)
+        if self.ssl:
+            self.sock = self.ssl.wrap_socket(self.sock, server_hostname=self.server)
         premsg = bytearray(b"\x10\0\0\0\0\0")
         msg = bytearray(b"\x04MQTT\x00\0\0\0")
         msg[5] = 0x05 if mqttv5 else 0x04
