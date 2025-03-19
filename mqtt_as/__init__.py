@@ -440,7 +440,13 @@ class MQTT_base:
                 pass
             self._close()
         self._has_connected = False
-
+    
+    async def switch_ap(self, ssid, pw):
+        self._ssid = ssid
+        self._wifi_pw = pw
+        self.disconnect()
+        self.connect()
+        
     def _close(self):
         if self._sock is not None:
             self._sock.close()
